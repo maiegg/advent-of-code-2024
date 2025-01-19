@@ -2,7 +2,7 @@ def solve():
     
     import re
 
-    text = open('input/day3.txt').read()
+    file_contents = open('input/day3.txt').read()
     
     # this regex is doing all the work - got help from reddit for this one 
     # per instruction, all mul() inputs are 1-3 digit numbers 
@@ -18,7 +18,7 @@ def solve():
     # like mul(123, ...) with no second argument - this seems to return the wrong answer 
     # pattern = r"mul\(\s*(\d{1,3})\s*,\s*.*?\s*(\d{1,3})\s*\)"
 
-    matches = re.findall(pattern, text)
+    matches = re.findall(pattern, file_contents)
 
     ans = 0
 
@@ -31,3 +31,44 @@ def solve():
         ans += result # add up to totalSum
 
     print(f'Part 1: {ans}')
+
+    ### Part 2 
+    # do() enables future instructions, don't() disables them 
+    # enabled at start 
+
+    # Strategy: start at beginning of text, scan for regex pattern, and store start index along with instruction
+    # Do the same for do() and don't() patterns 
+    
+    # Find mul() matches with their positions
+    instructions = [] 
+    for match in re.finditer(pattern, file_contents):
+        instructions.append(('mul',match.group(), match.start()))
+        
+    # Find do() matches with their positions 
+    pattern = r"do\(\)"
+    dos = [] 
+    for match in re.finditer(pattern, file_contents):
+        dos.append(('do',match.group(), match.start()))
+
+    # Find don't() matches with their positions 
+    pattern = r"don't\(\)"
+    donts = [] 
+    for match in re.finditer(pattern, file_contents):
+        donts.append(('dont',match.group(), match.start()))
+        
+    all_instructions = instructions + dos + donts
+    all_instructions_sorted = sorted(all_instructions, key=lambda x: x[2])
+
+    ans2 = 0 
+    enabled = True 
+    for inst in all_instructions_sorted:
+        if inst[0] == 'dont':
+            enabled = False 
+        elif inst[0] == 'do':
+            enabled = True 
+        elif (inst[0] == 'mul') & (enabled):
+            numbers = [int(elem) for elem in inst[1].replace('mul(', '').replace(')','').split(',')] # convert strings to int
+            result = numbers[0] * numbers[1]
+            ans2 += result
+
+    print(f'Part 2: {ans2}')
