@@ -6,7 +6,7 @@ def solve():
     levels = []
     with open(fn, 'r') as file:
         for line in file:
-            parts = line.split() # Split each line into two parts based on whitespace (default delimiter)
+            parts = line.split() # Split each line into parts based on whitespace (default delimiter)
             parts = [int(i) for i in parts]
             levels.append(
                 parts
