@@ -35,8 +35,39 @@ def solve():
     for update in updates:
         if is_update_valid(update, rules):
             ans += update[len(update) // 2]
-
+        
     print(f'Part 1: {ans}')
 
     # Part 2: 
-    
+    def make_update_valid(update, rules):
+        # Relevant rules = those in which BOTH pages referenced are contained in the update 
+        relevant_rules = [(a,b) for a, b in rules if a in update and b in update]
+        
+        # Create a lookup of {value: idx} for all the values in update 
+        pos_lookup = {value: idx for idx, value in enumerate(update)}
+        
+        while not is_update_valid(update, relevant_rules):
+            for a,b in relevant_rules:
+                if pos_lookup[a] >= pos_lookup[b]:
+                    update[pos_lookup[a]] = b
+                    update[pos_lookup[b]] = a 
+
+                    old_a_pos = pos_lookup[a]
+                    old_b_pos = pos_lookup[b]
+                    pos_lookup[a] = old_b_pos
+                    pos_lookup[b] = old_a_pos
+
+        return update 
+      
+    # Iterate through the updates
+    ans = 0
+    for update in updates:
+        if is_update_valid(update, rules):
+            pass
+            # ans += update[len(update) // 2]
+        else:
+            # print('bad update:',update)
+            update_fixed = make_update_valid(update, rules)
+            ans += update_fixed[len(update_fixed) // 2]
+            
+    print(f'Part 2: {ans}')
