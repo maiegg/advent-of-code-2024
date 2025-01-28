@@ -9,6 +9,8 @@ def solve():
         for line in file:
             grid.append(line.strip())
 
+    plot = False 
+    
     # Get grid dimensions
     grid_rows = len(grid)
     grid_cols = len(grid[0])
@@ -71,39 +73,40 @@ def solve():
     # Output the total number of distinct positions visited
     print(f'Part 1: {len(set(visited))}')
 
-    # Create the plot and set up animation
-    fig, ax = plt.subplots(figsize=(8, 8))
-    ax.set_xlim(0, grid_cols)
-    ax.set_ylim(0, grid_rows)
-    ax.set_aspect('equal', adjustable='box')
-    ax.invert_yaxis()  # Invert y-axis to match grid coordinates
-    ax.set_title('Guard Path Animation')
-    ax.set_xlabel('Column')
-    ax.set_ylabel('Row')
-    ax.grid(True)
+    if plot:
+        # Create the plot and set up animation
+        fig, ax = plt.subplots(figsize=(8, 8))
+        ax.set_xlim(0, grid_cols)
+        ax.set_ylim(0, grid_rows)
+        ax.set_aspect('equal', adjustable='box')
+        ax.invert_yaxis()  # Invert y-axis to match grid coordinates
+        ax.set_title('Guard Path Animation')
+        ax.set_xlabel('Column')
+        ax.set_ylabel('Row')
+        ax.grid(True)
 
-    # Plot obstacles
-    for obstacle in obstacles:
-        ax.scatter(obstacle[1], obstacle[0], color='black', label='Obstacle' if obstacle == next(iter(obstacles)) else "")
+        # Plot obstacles
+        for obstacle in obstacles:
+            ax.scatter(obstacle[1], obstacle[0], color='black', label='Obstacle' if obstacle == next(iter(obstacles)) else "")
 
-    # Plot the starting position
-    ax.scatter(guard_starting_pos[1], guard_starting_pos[0], color='red', s=100, label='Start')
+        # Plot the starting position
+        ax.scatter(guard_starting_pos[1], guard_starting_pos[0], color='red', s=100, label='Start')
 
-    # Initialize path plot
-    path, = ax.plot([], [], color='blue', marker='o', markersize=5, label='Path')
+        # Initialize path plot
+        path, = ax.plot([], [], color='blue', marker='o', markersize=5, label='Path')
 
-    # Update function for animation
-    def update(frame):
-        path_x, path_y = zip(*visited[:frame + 1])  # Get positions up to current frame
-        path.set_data(path_y, path_x)
-        return path,
+        # Update function for animation
+        def update(frame):
+            path_x, path_y = zip(*visited[:frame + 1])  # Get positions up to current frame
+            path.set_data(path_y, path_x)
+            return path,
 
-    # Create animation with one frame per visited position
-    ani = animation.FuncAnimation(fig, update, frames=len(visited), interval=200, blit=True, repeat=False)
+        # Create animation with one frame per visited position
+        ani = animation.FuncAnimation(fig, update, frames=len(visited), interval=200, blit=True, repeat=False)
 
-    # Save the animation as a GIF
-    ani.save('guard_path.gif', writer=animation.PillowWriter(fps=10))
+        # Save the animation as a GIF
+        ani.save('guard_path.gif', writer=animation.PillowWriter(fps=10))
 
-    plt.legend()
-    plt.show()
+        plt.legend()
+        plt.show()
 
