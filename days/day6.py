@@ -10,6 +10,7 @@ def solve():
             grid.append(line.strip())
 
     plot = False 
+    solve_part_2 = False 
     
     # Get grid dimensions
     grid_rows = len(grid)
@@ -110,3 +111,97 @@ def solve():
         plt.legend()
         plt.show()
 
+    if solve_part_2:
+        solvePart2()
+
+def solvePart2():
+    # Read input from the file
+    fn = 'input/day6.txt'
+    grid = []
+    with open(fn, 'r') as file:
+        for line in file:
+            grid.append(line.strip())
+
+    # Get grid dimensions
+    grid_rows = len(grid)
+    grid_cols = len(grid[0])
+
+    # Find the starting position of the guard and obstacles
+    obstacles = set()
+    guard_starting_pos = None
+    guard_facing = 'up'  # Initial direction of the guard
+
+    for i in range(grid_rows):
+        for j in range(grid_cols):
+            if grid[i][j] == '#':
+                obstacles.add((i, j))
+            elif grid[i][j] == '^':
+                guard_starting_pos = (i, j)
+
+    # Map directions to movements
+    directions = {
+        'up': (-1, 0),
+        'right': (0, 1),
+        'down': (1, 0),
+        'left': (0, -1)
+    }
+
+    # Helper function to find the next position
+    def find_next_pos(pos, facing):
+        return (pos[0] + directions[facing][0], pos[1] + directions[facing][1])
+
+    # Helper function to turn right
+    def turn_right(current_facing):
+        if current_facing == 'up':
+            return 'right'
+        elif current_facing == 'right':
+            return 'down'
+        elif current_facing == 'down':
+            return 'left'
+        elif current_facing == 'left':
+            return 'up'
+
+    # Simulate the guard's movement
+    def simulate_with_obstruction(new_obstacle):
+        visited_states = set()
+        guard_pos = guard_starting_pos
+        guard_facing = 'up'
+
+        while True:
+            state = (guard_pos, guard_facing)
+
+            # Check if we're in a loop
+            if state in visited_states:
+                return True  # The guard is stuck in a loop
+            visited_states.add(state)
+
+            # Find the next position
+            next_pos = find_next_pos(guard_pos, guard_facing)
+
+            # Check if the guard is still within the grid
+            if not (0 <= next_pos[0] < grid_rows and 0 <= next_pos[1] < grid_cols):
+                return False  # Guard exits the grid, not a loop
+
+            # Check if the next position is an obstacle
+            if next_pos in obstacles or next_pos == new_obstacle:
+                # Turn right if blocked
+                guard_facing = turn_right(guard_facing)
+            else:
+                # Move forward if not blocked
+                guard_pos = next_pos
+
+    # Find all valid positions for a new obstruction
+    valid_obstruction_positions = [
+        (i, j)
+        for i in range(grid_rows)
+        for j in range(grid_cols)
+        if (i, j) not in obstacles and (i, j) != guard_starting_pos
+    ]
+
+    # Count positions that create a loop
+    loop_count = 0
+    for new_obstacle in valid_obstruction_positions:
+        if simulate_with_obstruction(new_obstacle):
+            loop_count += 1
+
+    print(f'Part 2: {loop_count}')
