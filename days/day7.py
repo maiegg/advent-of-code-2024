@@ -1,6 +1,38 @@
+def solve3():
+    print('v2')
+    fn = 'input/day7.txt'
+
+    equations = dict()
+ 
+    def canGenerateResult(currSum, idx, result, equation):
+        if idx == len(equation):
+            if currSum == result:
+                return True
+            else:
+                return False
+        return (canGenerateResult(currSum + equation[idx], idx + 1, result, equation) or
+                canGenerateResult(currSum * equation[idx], idx + 1, result, equation))
+
+
+    def calibrationResult(equations: dict) -> int:
+        totalCalibrationResult = 0
+        for result, equation in equations.items():
+            if canGenerateResult(equation[0], 1, result, equation):
+                totalCalibrationResult += result
+        return totalCalibrationResult
+    
+    file_path = fn
+    with open(file_path, "r") as f:
+        lines = f.readlines()
+        for line in lines:
+            key = int(line.split(":")[0])
+            val = [int(num) for num in line.split(":")[1].strip().split(" ")]
+            equations[key] = val
+    print(calibrationResult(equations))
+
 def solve():
     # Read input from the file
-    fn = 'input/day7test.txt'
+    fn = 'input/day7.txt'
     data = {}
     with open(fn, 'r') as file:
         for line in file:
@@ -12,7 +44,8 @@ def solve():
     import itertools 
 
     def generate_operator_combinations(n):
-        operators = ['+','-','*','/']
+        # generate a lit of the possible operator combinations based on how many "spaces between numbers" (ie, len(v) - 1) there are
+        operators = ['+','*']
         return list(itertools.product(operators, repeat=n-1))
 
     def evaluate_expression(numbers, operators):
@@ -20,32 +53,26 @@ def solve():
         for i in range(len(operators)):
             if operators[i] == '+':
                 result += numbers[i+1]
-            elif operators[i] == '-':
-                result -= numbers[i+1]
             elif operators[i] == '*':
-                result *= numbers[i+1]
-            elif operators[i] == '/':
-                if numbers[i+1] == 0:
-                    return float('inf')
-                result /= numbers[i+1]
-
+                result = result * numbers[i+1]
         return result
-
     
-    def count_ways(target, numbers):
-        operator_combinations = generate_operator_combinations(len(numbers))
-        count = 0 
-        
+    def targetIfSolvable(target, numbers):
+        operator_combinations = generate_operator_combinations(len(numbers))    
+
         for operators in operator_combinations:
             result = evaluate_expression(numbers, operators)
-            
             if result == target:
-                count += 1 
+                return int(target)
 
-        return count 
+        return 0
     
     ans = 0 
     for (k, v) in data.items():
-        # print(k,v, count_ways(target=k, numbers=v))
-        ans += count_ways(target=k, numbers=v)
+        ans += targetIfSolvable(target=k, numbers=v)
+
     print(f'Part 1: {ans}')
+
+
+
+
