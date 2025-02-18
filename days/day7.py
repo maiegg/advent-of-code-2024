@@ -1,50 +1,40 @@
-def solve3():
-    print('v2')
-    fn = 'input/day7.txt'
-
-    equations = dict()
- 
-    def canGenerateResult(currSum, idx, result, equation):
-        if idx == len(equation):
-            if currSum == result:
-                return True
-            else:
-                return False
-        return (canGenerateResult(currSum + equation[idx], idx + 1, result, equation) or
-                canGenerateResult(currSum * equation[idx], idx + 1, result, equation))
-
-
-    def calibrationResult(equations: dict) -> int:
-        totalCalibrationResult = 0
-        for result, equation in equations.items():
-            if canGenerateResult(equation[0], 1, result, equation):
-                totalCalibrationResult += result
-        return totalCalibrationResult
-    
-    file_path = fn
-    with open(file_path, "r") as f:
-        lines = f.readlines()
-        for line in lines:
-            key = int(line.split(":")[0])
-            val = [int(num) for num in line.split(":")[1].strip().split(" ")]
-            equations[key] = val
-    print(calibrationResult(equations))
-
 def solve():
     # Read input from the file
     fn = 'input/day7.txt'
-    data = {}
-    with open(fn, 'r') as file:
-        for line in file:
 
-            k = int(line.split(': ')[0])
-            v = [int(i) for i in line.split(': ')[1].split(' ')]
-            data[k] = v
+    def is_valid(target, ns, p2):
+        if len(ns) == 1:
+            return ns[0] == target
+        if is_valid(target, [ns[0] + ns[1]] + ns[2:], p2):
+            return True
+        if is_valid(target, [ns[0]*ns[1]] + ns[2:], p2):
+            return True
+        if p2 and is_valid(target,[int(str(ns[0]) + str(ns[1]))] + ns[2:], p2):
+            return True
+        return False
     
+    p1 = 0
+    p2 = 0
+    D = open(fn).read().strip()
+    for line in D.strip().split('\n'):
+        target, ns = line.strip().split(':')
+        target = int(target)
+        ns = [int(x) for x in ns.strip().split()]
+    
+        if is_valid(target, ns, p2=False):
+            p1 += target
+        if is_valid(target, ns, p2=True):
+            p2 += target
+
+    print(f'Part 1: {p1}')
+    print(f'Part 2: {p2}')
+    # Above solution is easier to extend for part 2; below is my original for part 1. 
+    # I had a bug in the file parsing that kept me stuck for a while, but core logic was correct 
+
     import itertools 
 
     def generate_operator_combinations(n):
-        # generate a lit of the possible operator combinations based on how many "spaces between numbers" (ie, len(v) - 1) there are
+        # generate a lit of the possible operator combinations based on how many "spaces between numbers" (ie, len(v) - 1) 
         operators = ['+','*']
         return list(itertools.product(operators, repeat=n-1))
 
@@ -67,12 +57,15 @@ def solve():
 
         return 0
     
+
+    # Read input from the file
     ans = 0 
-    for (k, v) in data.items():
-        ans += targetIfSolvable(target=k, numbers=v)
+    
+    D = open(fn).read().strip()
+    for line in D.strip().split('\n'):
+        target, ns = line.strip().split(':')
+        target = int(target)
+        ns = [int(x) for x in ns.strip().split()]
+        ans += targetIfSolvable(target=target, numbers=ns)
 
-    print(f'Part 1: {ans}')
-
-
-
-
+    print(f'Part 1 (orig): {ans}')
